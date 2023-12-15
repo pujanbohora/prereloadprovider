@@ -50,26 +50,17 @@ class VideoPageProvider extends StatelessWidget {
           return PageView.builder(
             itemCount: state.urls.length,
             scrollDirection: Axis.vertical,
-            onPageChanged: (index){
-              print("TOTAL URLS::${state.urls[index]}");
-              int newIndex = index;
-              print("PAGE INDEX CHANGED::${newIndex}");
-              state.onVideoIndexChanged(newIndex);
-            },
-            // BlocProvider.of<PreloadBloc>(context, listen: false)
-            //     .add(PreloadEvent.onVideoIndexChanged(index)),
+            onPageChanged: (index) =>
+                state.onVideoIndexChanged(index),
             itemBuilder: (context, index) {
-              state.setBuildContext(context);
-              print("BUILD INDEX OF VIDEO:::${index}");
-              // Is at end and isLoading
               final bool _isLoading =
-                  (state.isLoading && index == state.urls.length - 1);
+              (state.isLoading && index == state.urls.length - 1);
 
               return state.focusedIndex == index
                   ? VideoWidget(
-                      isLoading: _isLoading,
-                      controller: state.controllers[index]!,
-                    )
+                isLoading: _isLoading,
+                controller: state.controllers[index]!,
+              )
                   : const SizedBox();
             },
           );
@@ -79,7 +70,6 @@ class VideoPageProvider extends StatelessWidget {
   }
 }
 
-/// Custom Feed Widget consisting video
 class VideoWidget extends StatelessWidget {
   const VideoWidget({
     Key? key,
@@ -101,16 +91,14 @@ class VideoWidget extends StatelessWidget {
           duration: const Duration(milliseconds: 400),
           firstChild: Padding(
             padding: const EdgeInsets.all(10.0),
-            child: CupertinoActivityIndicator(
-              color: Colors.white,
-              radius: 8,
-            ),
+            child: CircularProgressIndicator(),
           ),
           secondChild: const SizedBox(),
           crossFadeState:
-              isLoading ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+          isLoading ? CrossFadeState.showFirst : CrossFadeState.showSecond,
         ),
       ],
     );
   }
 }
+

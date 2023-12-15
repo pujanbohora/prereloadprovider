@@ -1,11 +1,6 @@
-import 'dart:async';
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_preload_videos/service/api_service.dart';
 import 'package:video_player/video_player.dart';
-import '../main.dart';
-import 'core/constants.dart';
 
 class PreloadViewModel extends ChangeNotifier {
   List<String> _urls = [];
@@ -20,63 +15,49 @@ class PreloadViewModel extends ChangeNotifier {
   int _focusedIndex = 0;
   int get focusedIndex => _focusedIndex;
 
-  int _reloadCounter = 0;
-  int get reloadCounter => _reloadCounter;
+  // Other methods and properties...
 
-  setAddUrls(List<String> urls) {
+  void setAddUrls(List<String> urls) {
     _urls.addAll(urls);
     notifyListeners();
   }
 
-  setVideoController(VideoPlayerController controller, index) {
-    // _controllers.length = index + 1;
+  void setVideoController(VideoPlayerController controller, int index) {
     _controllers.add(controller);
     notifyListeners();
   }
 
-  BuildContext? _context;
-  BuildContext? get context => _context;
-
-  setBuildContext(BuildContext context) {
-    _context = context;
-  }
-
-  Future<VideoPlayerController?> initializeControllerAtIndex(int index) async {
+  Future<void> initializeControllerAtIndex(int index) async {
     if (index >= 0 && index < _urls.length) {
-      print("INITILIZED VIDEO INDEX IS::::${index}");
       final VideoPlayerController controller =
           VideoPlayerController.network(_urls[index]);
 
-      print("VIDEO BEING INITILIZEDD::::${_urls[index]}");
-
       setVideoController(controller, index);
 
-      // _controllers[index] = controller;
       try {
         await controller.initialize();
         print('Controller initialized successfully for index $index');
-        return controller;
       } catch (e) {
         print('Error initializing video at index $index: $e');
         _controllers.remove(index);
-        return null;
       }
+      notifyListeners();
     } else {
       print('Invalid index: $index');
-      return null;
     }
   }
 
-  void onVideoIndexChanged(int index) {
-    // final bool shouldFetch = (index + kPreloadLimit) % kNextLimit == 0 &&
-    //     _urls.length == index + kPreloadLimit;
-    //
-    // print("SHOULD FETCH:::$shouldFetch");
-    //
-    // if (shouldFetch) {
-    //   createIsolate(index);
-    // }
+  setFocusedIndex(int index) {
+    _focusedIndex = index;
+    notifyListeners();
+  }
 
+  setLoading(bool loading) {
+    _isLoading = loading;
+    notifyListeners();
+  }
+
+  void onVideoIndexChanged(int index) {
     print("ON VIDEO INDEX:::${index}");
     print("ON VIDEO focus index:::${_focusedIndex}");
 
@@ -97,8 +78,20 @@ class PreloadViewModel extends ChangeNotifier {
     if (_controllers.length > index && _controllers[index] != null) {
       final VideoPlayerController controller = _controllers[index]!;
 
-      print("INDEX TWO IS::::${controller}");
-      controller.play();
+      Future<void> playController() async {
+        if (controller.value.isInitialized) {
+          print("INDEX TWO IS::::${controller}");
+          controller.play();
+          // initializeControllerAtIndex(index + 1);
+        } else {
+          // Wait for initialization and then play
+          await controller.initialize();
+          print("INDEX TWO IS::::${controller}");
+          controller.play();
+        }
+      }
+
+      playController();
       notifyListeners();
     }
   }
@@ -156,40 +149,15 @@ class PreloadViewModel extends ChangeNotifier {
     await initializeControllerAtIndex(1);
 
     setLoading(false);
-    setReloadCounter(_reloadCounter + 1);
     notifyListeners();
   }
 
-  void updateUrls(List<String> newUrls) {
-    // _urls.addAll(newUrls);
-    setAddUrls(newUrls);
-    initializeControllerAtIndex(_focusedIndex + 1);
-    setReloadCounter(_reloadCounter + 1);
-    setLoading(false);
-    log('🚀🚀🚀 NEW VIDEOS ADDED');
-  }
-
-  void setLoading(bool loading) {
-    _isLoading = loading;
-    notifyListeners();
-  }
-
-  void setFocusedIndex(int index) {
-    _focusedIndex = index;
-    notifyListeners();
-  }
-
-  void setReloadCounter(int counter) {
-    _reloadCounter = counter;
-    notifyListeners();
-  }
+  // Other methods...
 
   @override
   void dispose() {
     for (final controller in _controllers) {
-      if (controller != null) {
-        controller.dispose();
-      }
+      controller?.dispose();
     }
     _controllers.clear();
     super.dispose();

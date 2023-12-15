@@ -116,7 +116,7 @@ Future createIsolate(int index) async {
   // BlocProvider.of<PreloadBloc>(context, listen: false)
   //     .add(PreloadEvent.updateUrls(_urls));
 
-  Provider.of<PreloadViewModel>(context, listen: false).updateUrls(_urls);
+  // Provider.of<PreloadViewModel>(context, listen: false).updateUrls(_urls);
 }
 
 void getVideosTask(SendPort mySendPort) async {
