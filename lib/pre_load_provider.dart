@@ -6,8 +6,8 @@ class PreloadViewModel extends ChangeNotifier {
   List<String> _urls = [];
   List<String> get urls => _urls;
 
-  List<VideoPlayerController?> _controllers = [];
-  List<VideoPlayerController?> get controllers => _controllers;
+  Map<int, VideoPlayerController> _controllers = {};
+  Map<int, VideoPlayerController> get controllers => _controllers;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -22,8 +22,13 @@ class PreloadViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  // void setVideoController(VideoPlayerController controller, int index) {
+  //   _controllers.add(controller);
+  //   notifyListeners();
+  // }
+
   void setVideoController(VideoPlayerController controller, int index) {
-    _controllers.add(controller);
+    _controllers[index] = controller;
     notifyListeners();
   }
 
@@ -154,12 +159,12 @@ class PreloadViewModel extends ChangeNotifier {
 
   // Other methods...
 
-  @override
-  void dispose() {
-    for (final controller in _controllers) {
-      controller?.dispose();
-    }
-    _controllers.clear();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   for (final controller in _controllers) {
+  //     controller?.dispose();
+  //   }
+  //   _controllers.clear();
+  //   super.dispose();
+  // }
 }
